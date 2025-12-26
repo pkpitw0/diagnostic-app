@@ -2,11 +2,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebas
 import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
 /* 🔴 PASTE YOUR FIREBASE CONFIG HERE */
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID"
+  apiKey: "AIzaSyA-i_Q8_XfSIjfTPHxgZFF6zQU6SGDQylw",
+  authDomain: "diagnostics-83f7c.firebaseapp.com",
+  databaseURL: "https://diagnostics-83f7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "diagnostics-83f7c",
+  storageBucket: "diagnostics-83f7c.firebasestorage.app",
+  messagingSenderId: "338963278068",
+  appId: "1:338963278068:web:71544b0a6aace1ccc1d6a1",
+  measurementId: "G-V5KSSTWE1P"
 };
 
 // Initialize Firebase
@@ -44,3 +49,4 @@ document.getElementById("testForm").addEventListener("submit", function(e){
     <p><b>Date:</b> ${patient.date}</p>
   `;
 });
+
