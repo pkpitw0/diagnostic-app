@@ -1,7 +1,8 @@
+/************* FIREBASE IMPORTS *************/
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
 
-/* 🔴 PASTE YOUR FIREBASE CONFIG HERE */
+/************* FIREBASE CONFIG (PASTE YOUR OWN) *************/
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyA-i_Q8_XfSIjfTPHxgZFF6zQU6SGDQylw",
@@ -14,39 +15,63 @@ const firebaseConfig = {
   measurementId: "G-V5KSSTWE1P"
 };
 
-// Initialize Firebase
+/************* INITIALIZE FIREBASE *************/
 const app = initializeApp(firebaseConfig);
-
-// Initialize Database
 const db = getDatabase(app);
 
-// FORM SUBMIT LOGIC
-document.getElementById("testForm").addEventListener("submit", function(e){
+/************* PDF LIBRARY *************/
+const { jsPDF } = window.jspdf;
+
+/************* FORM SUBMIT *************/
+document.getElementById("cbcForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  let patient = {
-    name: document.getElementById("patientName").value,
+  const patient = {
+    name: document.getElementById("name").value,
     age: document.getElementById("age").value,
     gender: document.getElementById("gender").value,
-    hemoglobin: document.getElementById("hemoglobin").value,
-    sugar: document.getElementById("sugar").value,
-    cholesterol: document.getElementById("cholesterol").value,
+    hb: document.getElementById("hb").value,
+    rbc: document.getElementById("rbc").value,
+    wbc: document.getElementById("wbc").value,
+    platelets: document.getElementById("platelets").value,
+    pcv: document.getElementById("pcv").value,
+    mcv: document.getElementById("mcv").value,
+    mch: document.getElementById("mch").value,
+    mchc: document.getElementById("mchc").value,
     date: new Date().toLocaleString()
   };
 
-  // SAVE DATA ONLINE
-  push(ref(db, "patients"), patient);
+  /************* SAVE TO FIREBASE *************/
+  push(ref(db, "cbcReports"), patient);
 
-  // GENERATE REPORT
-  document.getElementById("report").innerHTML = `
-    <h3>Diagnostic Report</h3>
-    <p><b>Name:</b> ${patient.name}</p>
-    <p><b>Age:</b> ${patient.age}</p>
-    <p><b>Gender:</b> ${patient.gender}</p>
-    <p><b>Hemoglobin:</b> ${patient.hemoglobin}</p>
-    <p><b>Blood Sugar:</b> ${patient.sugar}</p>
-    <p><b>Cholesterol:</b> ${patient.cholesterol}</p>
-    <p><b>Date:</b> ${patient.date}</p>
-  `;
+  /************* GENERATE PDF *************/
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("DIAGNOSTIC LABORATORY", 60, 15);
+  doc.setFontSize(12);
+  doc.text("Complete Blood Picture (CBC)", 65, 25);
+  doc.line(10, 30, 200, 30);
+
+  doc.text(`Patient Name: ${patient.name}`, 10, 40);
+  doc.text(`Age: ${patient.age}`, 10, 48);
+  doc.text(`Gender: ${patient.gender}`, 10, 56);
+  doc.text(`Date: ${patient.date}`, 10, 64);
+
+  doc.line(10, 70, 200, 70);
+
+  let y = 80;
+  doc.text("Hemoglobin (g/dL):", 10, y); doc.text(patient.hb, 90, y); y += 8;
+  doc.text("RBC (million/µL):", 10, y); doc.text(patient.rbc, 90, y); y += 8;
+  doc.text("WBC (/µL):", 10, y); doc.text(patient.wbc, 90, y); y += 8;
+  doc.text("Platelets (lakhs):", 10, y); doc.text(patient.platelets, 90, y); y += 8;
+  doc.text("PCV (%):", 10, y); doc.text(patient.pcv, 90, y); y += 8;
+  doc.text("MCV (fL):", 10, y); doc.text(patient.mcv, 90, y); y += 8;
+  doc.text("MCH (pg):", 10, y); doc.text(patient.mch, 90, y); y += 8;
+  doc.text("MCHC (%):", 10, y); doc.text(patient.mchc, 90, y);
+
+  doc.line(10, y + 10, 200, y + 10);
+  doc.text("Authorized Signatory", 140, y + 25);
+
+  doc.save(`${patient.name}_CBC_Report.pdf`);
 });
-
