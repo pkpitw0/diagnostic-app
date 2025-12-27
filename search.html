@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search CBC Reports</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    h2 { text-align: center; }
+    input { padding: 10px; width: 300px; }
+    button { padding: 10px 15px; cursor: pointer; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    th { background: #007BFF; color: white; }
+  </style>
+</head>
+
+<body>
+
+<h2>🔍 Search CBC Reports</h2>
+
+<center>
+  <input type="text" id="searchName" placeholder="Enter Patient Name">
+  <button onclick="search()">Search</button>
+</center>
+
+<table id="resultTable">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Age</th>
+      <th>Gender</th>
+      <th>Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const { jsPDF } = window.jspdf;
+
+  window.search = async function () {
+    const name = document.getElementById("searchName").value.toLowerCase();
+    const tbody = document.querySelector("#resultTable tbody");
+    tbody.innerHTML = "";
+
+    const snapshot = await get(ref(db, "cbcReports"));
+    if (!snapshot.exists()) return;
+
+    snapshot.forEach(child => {
+      const data = child.val();
+
+      if (data.name.toLowerCase().includes(name)) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.name}</td>
+          <td>${data.age}</td>
+          <td>${data.gender}</td>
+          <td>${data.date}</td>
+          <td><button onclick='download(${JSON.stringify(data)})'>PDF</button></td>
+        `;
+        tbody.appendChild(row);
+      }
+    });
+  };
+
+  window.download = function (p) {
+    const doc = new jsPDF();
+    doc.text("CBC REPORT", 80, 15);
+    doc.line(10, 20, 200, 20);
+
+    let y = 30;
+    for (let key in p) {
+      doc.text(`${key.toUpperCase()}: ${p[key]}`, 10, y);
+      y += 8;
+    }
+    doc.save(p.name + "_CBC_Report.pdf");
+  };
+</script>
+
+</body>
+</html>
